@@ -63,38 +63,87 @@ removeQuote = function(charVect)
 }
 #on applique toutes les fonctions precedentes dans l'ordre :
 table[,
-      (colConcerned) := lapply(.SD,function(x) removeNull(removeComa(removeBraceComa(removeDoubleBrace(removeQuote(x)))))  ),
+      (colConcerned) := lapply(.SD,function(x) removeQuote(removeDoubleBrace(removeBraceComa(removeComa(removeNull(x)))))  ),
       .SDcols = colConcerned]
 
 
 #on enleve les changements qui n'en sont pas vraiment : par exemple :
 # "2012-10-13 02:33:04#100#100" : le chamgement etait de 100 à 100, donc pas de changement
-dealOneDate = function(oneDate)
+# dealOneDate = function(oneDate)
+# {
+#   temp = strsplit(oneDate,"#")
+#   res = sapply(temp,function(x) ifelse( length(x)==0 | x[2] == x[3] ,"",paste0(x,collapse = '#') ) )
+#   return(res)
+# }
+# agregateDates = function(x)
+# {
+#   temp = sapply(x,dealOneDate)
+#   paste0(temp[nchar(temp) > 0],collapse = ',' )
+# }
+# keepOnlyTrueChanges = function(x)
+# {
+#   temp = strsplit(x,",")
+#   sapply(temp,function(vectPossibleChange) agregateDates(vectPossibleChange) ) 
+# }
+# table[,
+#       (colConcerned) := lapply(.SD,keepOnlyTrueChanges),
+#       .SDcols = colConcerned]
+
+#nombre de changements
+newCol = paste(colConcerned,"Chgt",sep = "_")
+countNb = function(x)
 {
-  temp = strsplit(oneDate,"#")
-  res = sapply(temp,function(x) ifelse( length(x)==0 | x[2] == x[3] ,"",paste0(x,collapse = '#') ) )
-  return(res)
+  sapply(strsplit(x,","),length)
 }
-agregateDates = function(x)
+
+table[,
+      (newCol) := lapply(.SD,countNb),
+      .SDcols = colConcerned]
+#nbs de changements a la hausse
+newCol = paste(colConcerned,"Baisse",sep = "_")
+countNb = function(x)
 {
-  temp = sapply(x,dealOneDate)
-  paste0(temp[nchar(temp) > 0],collapse = ',' )
-}
-keepOnlyTrueChanges = function(x)
-{
-  temp = strsplit(x,",")
-  sapply(temp,function(vectPossibleChange) agregateDates(vectPossibleChange) ) 
+  sapply(strsplit(x,","),function(y) length(diff(y)) )
 }
 table[,
-      (colConcerned) := lapply(.SD,keepOnlyTrueChanges),
+      (newCol) := lapply(.SD,countNb),
       .SDcols = colConcerned]
 
+#nbs de changements a la baisse puis a la hausse
+extractValue = function(x)
+{
+  sapply(x,function(y) ifelse(grepl("#",y),as.numeric(strsplit(y,'#')[[1]][2]),0))
+}
+countChanges = function(x,fun = countBaisse)
+{
+  temp=lapply(strsplit(x,","),extractValue)
+  sapply(temp,fun)
+}
 
+countBaisse = function(x)
+{
+  temp = diff(x)
+  length(temp[temp<0])
+}
+newCol = paste(colConcerned,"Baisse",sep = "_")
+table[,
+      (newCol) := lapply(.SD,countChanges,fun = countBaisse),
+      .SDcols = colConcerned]
+unique(table[,depots_max_mois_Baisse])
+countHauuse= function(x)
+{
+  temp = diff(x)
+  length(temp[temp>0])
+}
+newCol = paste(colConcerned,"Hausse",sep = "_")
+table[,
+      (newCol) := lapply(.SD,countChanges,fun = countHauuse),
+      .SDcols = colConcerned]
+unique(table[,depots_max_mois_Hausse])
 
-
-str = c("2012-10-13 02:33:04#100#100","2012-10-13 02:33:04#100#101","","2014-07-06 23:45:58#1000#1000,2015-02-06 20:56:02#10001#10000")
-temp = strsplit(str,",")
-sapply(temp,function(x) agregateDates(x) ) 
-
-a = table[,limites_retraits]
-a[a != ""][4]
+##On ecrit la table :
+write.table(table,
+            "data/Costes_compte_x1x2_20150311Clean.csv",
+            sep = ";",
+            row.names = F,
+            col.names = T)
