@@ -1,0 +1,9 @@
+Etapes :
+1 - Division bases par type de jeu puis passage somme : jour -> mois puis fusion des 2 bases à la maille mois (Antoine)
+2 - Ecarter variables modérateurs non pertinentes dans la base compte (Benjamin)
+3 - Passage somme : mois -> compte (plus somme / mois) (Antoine)
+4 - Fusion avec base compte (modérateurs) et vérification pertinence des indicateurs ainsi construits (Antoine & Benjamin)
+5 - Création nouveaux indicateurs (variance, ...) (Antoine & Benjamin)
+6 - ACP (centrée réduite) -> sélection premiers axes (Antoine & Benjamin)
+7 - Clustering sur les coordonnées selon les axes choisis (Antoine & Benjamin)
+8 - Analyse discriminante pour selectionner les variables

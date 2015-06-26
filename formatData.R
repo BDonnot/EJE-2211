@@ -110,7 +110,7 @@ countNb = function(x)
   #'char' et les mettre tous dans un vecteur. Ces vecteurs seront ensuite
   #mis les uns au bout des autres dans une list.
   #on pourra consulter l'aider via ?strsplit
-  sapply(strsplit(x,","),length)
+  sapply(strsplit(x,","),length)-1
 }
 
 #on applique la fonction precedentes aux variables selectionnees :
@@ -131,6 +131,8 @@ table[,
 #nbs de changements a la baisse puis a la hausse
 extractValue = function(x)
 {
+  if(is.null(x) ) return(c(0))
+  if(length(x) == 0) return(c(0))
   #as.numeric va convertir la chaine de character en un nombre
   
   #grepl(char,stringVect) va renvoyer un vecteur res contenant autant d'elements
@@ -140,14 +142,33 @@ extractValue = function(x)
   #ifelse(vectBool,valeurSiVrai,valeurSiFaux) va renvoyer un vecteur 'res' de meme longeur
   #que vectBool. Chaque element de 'res' correspondera a 'valeurSiVrai' ou 'valeurSiFaux'
   #selon que l'element vectBool est vrai ou faux
-  sapply(x,function(y) ifelse(grepl("#",y),as.numeric(strsplit(y,'#')[[1]][2]),0) )
+  vapply(x,function(y) ifelse(grepl("#",y),as.numeric(strsplit(y,'#')[[1]][2]),0),FUN.VALUE = 0)
 }
+extractValueFromVectLast = function(x)
+{
+  temp = lapply(strsplit(x,","),extractValue)
+  vapply(temp,last,FUN.VALUE = 0)
+}
+extractValueFromVectMax= function(x)
+{
+  temp = lapply(strsplit(x,","),extractValue)
+  vapply(temp,max,FUN.VALUE = 0)
+}
+
+newCol = paste(colConcerned,"last",sep = "_")
+table[,
+      (newCol) := lapply(.SD,extractValueFromVectLast),
+      .SDcols = colConcerned]
+newCol = paste(colConcerned,"max",sep = "_")
+table[,
+      (newCol) := lapply(.SD,extractValueFromVectMax),
+      .SDcols = colConcerned]
+
 countChanges = function(x,fun = countBaisse)
 {
   temp=lapply(strsplit(x,","),extractValue)
   sapply(temp,fun)
 }
-
 countBaisse = function(x)
 {
   #diff(numericVect) va calculer la difference (au sens des series temporelles) du vecteur
