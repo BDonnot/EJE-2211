@@ -4,7 +4,6 @@
 #install.packages("data.table")
 ##on charge le package :
 library(data.table)
-
 ##on charge les donnees
 table = fread("data/Costes_compte_x1x2_20150311.csv", #le nom du document
               header = T, #oui il y a une entete

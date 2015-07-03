@@ -1,5 +1,8 @@
 library(data.table)
 
+library(ggplot2)
+library(reshape2)
+
 table = fread("data/Costes_compte_x1x2_20150311Clean.csv", #le nom du document
               header = T, #oui il y a une entete
               sep = ";", #le separateur *
@@ -125,8 +128,6 @@ table2 = copy(table2[,c("nombre_autointerdiction_ps",
                         "depots_max_semaine_Hausse",
                         "limites_retraits_Hausse"),with = F])
 
-library(ggplot2)
-library(reshape2)
 qplot(x=Var1, y=Var2, data=melt(cor(table2, use="p")), fill=value, geom="tile") +
   scale_fill_gradient2(limits=c(-1, 1))
 #on a un groupe de variables assez correlees : "limite retrait Chgt", 
