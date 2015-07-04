@@ -73,7 +73,6 @@ days[1354854,mois]
 setkeyv(days,c("numero_joueur",
                "numero_compte",
                "mois"))
-
 monthsFromDays = days[,list(paris_sportifs_nombre = sum(paris_sportifs_nombre,na.rm = T),
                             paris_sportifs_mises = sum(paris_sportifs_mises,na.rm = T),
                             paris_hippiques_nombre = sum(paris_hippiques_nombre,na.rm = T),

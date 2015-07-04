@@ -1,11 +1,11 @@
 rm(list=ls());gc()
 setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/EJE-2211/Donnees_ARJEL/")
-
+setwd("~/Documents/EJE-2211")
 library(data.table)
 library(ggplot2)
 library(xtable)
 
-jour=fread("Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
+jour=fread("data/Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
   "integer",
   "integer",
   "NULL",
@@ -27,7 +27,7 @@ jour=fread("Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(
   "integer",
   "numeric"
   ))
-mois=fread("Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+mois=fread("data/Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "NULL",
@@ -47,7 +47,7 @@ mois=fread("Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "numeric",
   "numeric",
   "numeric"))
-joueur=fread("Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+joueur=fread("data/Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "numeric",
@@ -133,7 +133,18 @@ PCbiplot <- function(PC, x="PC1", y="PC2", colors=c('black', 'black', 'red', 're
 }
 
 acp=prcomp(mois[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
+
 PCbiplot(acp,colors=c("black","black","black","dark blue"))
+
+biplot(acp,choices = 1:2,pch = ".")
+biplot(acp,choices = 2:3,pch = ".")
+biplot(acp,choices = 1:3,pch = ".")
+biplot(acp,choices = 1:4,pch = ".")
+biplot(acp,choices = 2:4,pch = ".")
+biplot(acp,choices = 3:4,pch = ".")
+
+plot(acp)
+barplot(acp$sdev)
 
 acp_jour=prcomp(jour[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
 
