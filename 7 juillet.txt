@@ -1,0 +1,15 @@
+- heatmap
+- variables qu'on a enlevées
+	- corrélation  -> type de jeu indépendant
+	- PCA : on confirme ph et poker indep
+	- trop de 0
+- non redondance des données : incohérence ! -> moyenne des deux répercutée par mois
+- parler du plan d'action
+
+- un truc sur les varibales ou un truc
+
+Antoine :
+- imprimer stat sur les 0
+- imprimer PCA
+- imprimer heatmaps
+
