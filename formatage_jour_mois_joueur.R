@@ -1,11 +1,11 @@
 rm(list=ls());gc()
 setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/EJE-2211/Donnees_ARJEL/")
-setwd("~/Documents/EJE-2211")
+
 library(data.table)
 library(ggplot2)
 library(xtable)
 
-jour=fread("data/Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
+jour=fread("Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
   "integer",
   "integer",
   "NULL",
@@ -27,7 +27,7 @@ jour=fread("data/Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(
   "integer",
   "numeric"
   ))
-mois=fread("data/Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+mois=fread("Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "NULL",
@@ -47,7 +47,7 @@ mois=fread("data/Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c
   "numeric",
   "numeric",
   "numeric"))
-joueur=fread("data/Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+joueur=fread("Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "numeric",
@@ -133,18 +133,7 @@ PCbiplot <- function(PC, x="PC1", y="PC2", colors=c('black', 'black', 'red', 're
 }
 
 acp=prcomp(mois[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
-
 PCbiplot(acp,colors=c("black","black","black","dark blue"))
-
-biplot(acp,choices = 1:2,pch = ".")
-biplot(acp,choices = 2:3,pch = ".")
-biplot(acp,choices = 1:3,pch = ".")
-biplot(acp,choices = 1:4,pch = ".")
-biplot(acp,choices = 2:4,pch = ".")
-biplot(acp,choices = 3:4,pch = ".")
-
-plot(acp)
-barplot(acp$sdev)
 
 acp_jour=prcomp(jour[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
 
@@ -178,6 +167,7 @@ qplot(x=Var1, y=Var2, data=melt(cor_mois), fill=value, geom="tile") +
 #Fusion
 setkeyv(mois,c("numero_joueur","numero_compte","mois"))
 fusion_mois=mois[jour_mois]
+
 setcolorder(fusion_mois,c(1:3,19,4:12,20:23,13:16,24:35,17:18))
 cor_fusion=cor(fusion_mois[,!c("numero_joueur","numero_compte","mois","jour"),with=FALSE])
 qplot(x=Var1, y=Var2, data=melt(cor_fusion), fill=value, geom="tile") +
@@ -190,11 +180,53 @@ fusion_sport=fusion_mois[,c(1:17,30:35),with=FALSE]
 fusion_hipp=fusion_mois[,c(1:4,18:25,30:35),with=FALSE]
 fusion_poker=fusion_mois[,c(1:4,26:35),with=FALSE]
 
-rm(jour,mois,jour_mois)
+rm(jour,mois,jour_mois); gc()
+
 #Agregation compte
-setkeyv(fusion_mois,c("numero_joueur","numero_compte"))
+vars_sport=colnames(fusion_sport)[-which(colnames(fusion_sport)%in%c("ps_live_mises",
+                                                                     "ps_foot_mises",
+                                                                     "ps_tennis_mises",
+                                                                     "ps_basket_mises",
+                                                                     "ps_rugby_mises",
+                                                                     "ps_autres_mises",
+                                                                     "ps_autres_mises",
+                                                                     "bonus_ps_nombre",
+                                                                     "bonus_ps_montant"))]
+vars_hipp=colnames(fusion_hipp)[-which(colnames(fusion_hipp)%in%c("bonus_ph_valeur","bonus_ph_montant"))]
+vars_poker=colnames(fusion_poker)[-which(colnames(fusion_poker)%in%c("bonus_jc_valeur","bonus_jc_montant"))]
+
+sport_melt=melt(fusion_sport[,c(lapply(.SD,sum)),
+                             by=key(fusion_sport),
+                             .SDcols=vars_sport],
+           id.vars=key(fusion_sport))
+hipp_melt=melt(fusion_hipp[,c(lapply(.SD,sum)),
+                             by=key(fusion_hipp),
+                             .SDcols=vars_hipp],
+                id.vars=key(fusion_hipp))
+poker_melt=melt(fusion_poker[,c(lapply(.SD,sum)),
+                             by=key(fusion_poker),
+                             .SDcols=vars_poker],
+                id.vars=key(fusion_poker))
+
+sport_dcast=data.table(dcast(data=sport_melt,formula=numero_joueur*numero_compte~variable*mois),
+                  key=c("numero_joueur","numero_compte"))
+hipp_dcast=data.table(dcast(data=hipp_melt,formula=numero_joueur*numero_compte~variable*mois),
+                       key=c("numero_joueur","numero_compte"))
+poker_dcast=data.table(dcast(data=poker_melt,formula=numero_joueur*numero_compte~variable*mois),
+                       key=c("numero_joueur","numero_compte"))
+
 setkeyv(fusion_sport,c("numero_joueur","numero_compte"))
 setkeyv(fusion_hipp,c("numero_joueur","numero_compte"))
 setkeyv(fusion_poker,c("numero_joueur","numero_compte"))
 
-fusion_compte_sport=fusion_sport[,lapply(.SD,sum),by=key(fusion_mois)]
+fusion_compte_sport=fusion_sport[,c(lapply(.SD,sum)),
+                                 by=key(fusion_sport),
+                                 .SDcols=vars_sport][sport_dcast]
+fusion_compte_hipp=fusion_hipp[,c(lapply(.SD,sum)),
+                               by=key(fusion_hipp),
+                               .SDcols=vars_hipp][hipp_dcast]
+fusion_compte_poker=fusion_poker[,c(lapply(.SD,sum)),
+                                 by=key(fusion_poker),
+                                 .SDcols=vars_poker][poker_dcast]
+
+dim(fusion_compte_sport);dim(fusion_compte_hipp);dim(fusion_compte_poker)
