@@ -1,11 +1,11 @@
 rm(list=ls());gc()
 setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/EJE-2211/Donnees_ARJEL/")
-
+setwd("D:/Users/Benjamin/Documents/EJE-2211")
 library(data.table)
 library(ggplot2)
 library(xtable)
 
-jour=fread("Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
+jour=fread("data/Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(  
   "integer",
   "integer",
   "NULL",
@@ -27,7 +27,7 @@ jour=fread("Costes_jour_x1x2_20150311.csv",sep=";",colClasses=c(
   "integer",
   "numeric"
   ))
-mois=fread("Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+mois_=fread("data/Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "NULL",
@@ -47,7 +47,7 @@ mois=fread("Costes_mois_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "numeric",
   "numeric",
   "numeric"))
-joueur=fread("Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
+joueur=fread("data/Costes_joueur_x1x2_20150311.csv",sep=";",header=TRUE,colClasses=c(
   "integer",
   "integer",
   "numeric",
@@ -75,41 +75,131 @@ setnames(jour,paste("V",c(1,2,4:20),sep=""),c(
   "bonus_jc_valeur",
   "bonus_jc_montant"))
 
+#########
 #Nouvelles variables
-mois[,mois:=month(as.Date(mois))]
 joueur[,civilite:=droplevels(factor(civilite,levels=c("M","M/MME","M/U","MME","U"),labels=c("M","M/MME","M","MME","M")))]
 joueur[,last_jeu:=as.Date(last_jeu)]
 joueur[,first_account:=as.Date(first_account)]
 joueur[,base_1_an:=first_account<"2014-01-01"]
-jour[,':='(jour=mday(as.Date(jour)),mois=month(as.Date(jour)))]
+jour[,':='(mois=gsub("(^2014-)|(-..$)","",jour),
+           jour=gsub("^2014-..-","",jour) )]
+mois_[,':='(mois=gsub("(^2014-)|(-..$)","",mois))]
 
-#Nb zeros
+########
+#summing the data at month level from days level
+setkey(jour,numero_joueur,numero_compte,mois)
+colsSum = c("paris_sportifs_nombre",
+            "paris_sportifs_mises",
+            "paris_hippiques_nombre",
+            "paris_hippiques_mises",
+            "caves_nombre",
+            "caves_euros",
+            "depots_nombre",
+            "depots_valeur",
+            "retrait_nombre",
+            "retrait_valeur",
+            "bonus_ps_nombre",
+            "bonus_ps_montant",
+            "bonus_ph_valeur",
+            "bonus_ph_montant",
+            "bonus_jc_valeur",
+            "bonus_jc_montant")
+jour_mois = jour[,lapply(.SD,sum,na.rm = T),
+                 .SDcols = colsSum,
+                 by = key(jour)]
+###########
+##adding (missing) pker variables to the month data base
+setkey(mois_,numero_joueur,numero_compte,mois)
+setkey(jour_mois,numero_joueur,numero_compte,mois)
 
+mois = mois_[jour_mois[,list(numero_joueur,numero_compte,mois,
+                             caves_nombre,caves_euros,bonus_jc_valeur,bonus_jc_montant,
+                             retrait_nombre,retrait_valeur,depots_nombre,depots_valeur)]]
+write.table(mois, #on veut ecrire la table nommee 'table'
+            "data/Costes_mois_vrai.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
+            sep = ";", #specifie le separateur des colonnes
+            row.names = F, #les lignes n'ont pas noms particulier, on ne rajoutera donc pas une colonne du type 'nom des lignes'
+            col.names = T) #on specifie par contre qu'il faut ecrire le nom des colonnes !
+mois[is.na(caves_nombre),]
+mois[is.na(ph_complexe_mises),]
+
+###########
+###Nb zeros
 nrow(jour[paris_sportifs_nombre !=0 & paris_hippiques_nombre !=0 ,])/nrow(jour[paris_sportifs_nombre !=0 ])
 nrow(jour[paris_sportifs_nombre !=0 & caves_nombre !=0 ,])/nrow(jour[caves_nombre !=0 ])
 
 jour_nzero=jour[,lapply(.SD,function(x)sum(x==0))]/nrow(jour)
 joueur[,lapply(.SD,function(x)sum(x==0))]/nrow(joueur)
-mois_nzero=mois[,lapply(.SD,function(x)sum(x==0))]/nrow(mois)
+mois_nzero=mois_[,lapply(.SD,function(x)sum(x==0))]/nrow(mois_)
 jour_mois[,lapply(.SD,function(x)sum(x==0))]/nrow(jour_mois)
 
 xtable(data.frame(t(jour_nzero),c(colnames(mois_nzero),NA,NA),rbind(t(mois_nzero),NA,NA)),digits=3)
 
-
-#Correlations
-cor_jour=cor(jour[,!c("numero_joueur","numero_compte"),with=FALSE])
-cor_mois=cor(mois[,!c("numero_joueur","numero_compte"),with=FALSE])
+##########
+#Correlations (heat map)
+cor_jour=cor(jour[,!c("numero_joueur","numero_compte","jour","mois"),with=FALSE])
+cor_mois=cor(mois[,!c("numero_joueur","numero_compte","mois"),with=FALSE])
 ind_jour=which((abs(cor_jour)>=0.5)&(cor_jour<1),arr.ind=TRUE)
 ind_mois=which((abs(cor_mois)>=0.5)&(cor_mois<1),arr.ind=TRUE)
 #rownames(cor_jour)[ind_jour[,1]]
 #colnames(cor_jour)[ind_jour[,2]]
 
+
 library(ggplot2)
 library(reshape2)
-qplot(x=Var1, y=Var2, data=melt(cor_jour), fill=value, geom="tile") +
+colnames(cor_jour)
+neworder = c("paris_sportifs_nombre",
+             "paris_sportifs_mises",
+             "bonus_ps_nombre",
+             "bonus_ps_montant",
+             "paris_hippiques_mises",
+             "paris_hippiques_nombre",
+             "bonus_ph_valeur",
+             "bonus_ph_montant",
+             "caves_nombre",
+             "caves_euros",
+             "bonus_jc_valeur",
+             "bonus_jc_montant",
+             "retrait_nombre",
+             "retrait_valeur",
+             "depots_nombre",
+             "depots_valeur")
+qplot(x=Var1, y=Var2, data=melt(cor_jour[neworder,neworder]), fill=value, geom="tile") +
   scale_fill_gradient2(limits=c(-1, 1)) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  xlab("")+ylab("")+ggtitle("Correlations (jours)")
 
+colnames(cor_mois)
+neworder = c("ps_mises",
+             "ps_gains",
+             "ps_complexes_mises",
+             "ps_live_mises",
+             "ps_foot_mises",
+             "ps_tennis_mises",
+             "ps_basket_mises",
+             "ps_rugby_mises",
+             "ps_autres_mises",
+             "ph_mises",
+             "ph_gains",
+             "ph_simple_mises",
+             "ph_complexe_mises",
+             "caves_nombre",
+             "caves_euros",
+             "bonus_jc_valeur",
+             "bonus_jc_montant",
+             "depots_nombre",
+             "depots_valeur",
+             "depots_3en12h",
+             "depots_1hapresmise",
+             "retrait_nombre",
+             "retrait_valeur"
+             )
+qplot(x=Var1, y=Var2, data=melt(cor_mois[neworder,neworder]), fill=value, geom="tile") +
+  scale_fill_gradient2(limits=c(-1, 1)) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  xlab("")+ylab("")+ggtitle("Correlations (mois)")
+
+########
 #ACP
 library(ggplot2)
 library(grid)
@@ -132,10 +222,33 @@ PCbiplot <- function(PC, x="PC1", y="PC2", colors=c('black', 'black', 'red', 're
   plot
 }
 
-acp=prcomp(mois[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
-PCbiplot(acp,colors=c("black","black","black","dark blue"))
+acpMois=prcomp(mois[,!c("numero_joueur","numero_compte","mois"),with=FALSE],scale=TRUE)
+# PCbiplot(acpMois,colors=c("black","black","black","dark blue"))
 
-acp_jour=prcomp(jour[,!c("numero_joueur","numero_compte"),with=FALSE],scale=TRUE)
+#fancy plots
+# library("devtools")
+# install_github("kassambara/factoextra")
+library(factoextra)
+fviz_pca_var(acpMois, axes = c(1, 2), geom = c("arrow", "text"),
+             label = "var", invisible = "none", labelsize = 4,
+             col.var = "x", alpha.var = 1) +
+  scale_color_gradient2(low="white", mid="blue",
+                        high="red") +
+  ggtitle("ACP axes 1 & 2 (mois)")
+
+fviz_pca_var(acpMois, axes = c(1, 3), geom = c("arrow", "text"),
+             label = "var", invisible = "none", labelsize = 4,
+             col.var = "x", alpha.var = 1) +
+  scale_color_gradient2(low="white", mid="blue",
+                        high="red") +
+  ggtitle("ACP axes 1 & 3 (mois)")
+
+fviz_pca_var(acpMois, axes = c(2, 3), geom = c("arrow", "text"),
+             label = "var", invisible = "none", labelsize = 4,
+             col.var = "x", alpha.var = 1) +
+  scale_color_gradient2(low="white", mid="blue",
+                        high="red") +
+  ggtitle("ACP axes 2 & 3 (mois)")
 
 
 ############################
