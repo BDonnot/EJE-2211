@@ -243,21 +243,21 @@ library(factoextra)
 fviz_pca_var(acpMois, axes = c(1, 2), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
              col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="white", mid="blue",
+  scale_color_gradient2(low="blue", mid="purple",
                         high="red") +
   ggtitle("ACP axes 1 & 2 (mois)")
 
 fviz_pca_var(acpMois, axes = c(1, 3), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
              col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="white", mid="blue",
+  scale_color_gradient2(low="blue", mid="purple",
                         high="red") +
   ggtitle("ACP axes 1 & 3 (mois)")
 
 fviz_pca_var(acpMois, axes = c(2, 3), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
              col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="white", mid="blue",
+  scale_color_gradient2(low="blue", mid="purple",
                         high="red") +
   ggtitle("ACP axes 2 & 3 (mois)")
 
