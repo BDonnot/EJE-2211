@@ -104,9 +104,16 @@ colsSum = c("paris_sportifs_nombre",
             "bonus_ph_montant",
             "bonus_jc_valeur",
             "bonus_jc_montant")
-jour_mois = jour[,lapply(.SD,sum,na.rm = T),
+jour_mois0 = jour[,lapply(.SD,sum,na.rm = T),
                  .SDcols = colsSum,
                  by = key(jour)]
+colsSum2 = c("paris_sportifs_nombre","paris_hippiques_nombre","caves_nombre")
+jour_mois1 = jour[,lapply(.SD,function(x) length(x[x!=0.0])),
+                 .SDcols = colsSum2,
+                 by = key(jour)]
+setnames(jour_mois1,c("numero_joueur","numero_compte","mois",
+                      "nb_jours_actifs_ps","nb_jours_actifs_ph","nb_jours_actifs_poker"))
+jour_mois = jour_mois0[jour_mois1]
 ###########
 ##adding (missing) pker variables to the month data base
 setkey(mois_,numero_joueur,numero_compte,mois)
@@ -114,7 +121,8 @@ setkey(jour_mois,numero_joueur,numero_compte,mois)
 
 mois = mois_[jour_mois[,list(numero_joueur,numero_compte,mois,
                              caves_nombre,caves_euros,bonus_jc_valeur,bonus_jc_montant,
-                             retrait_nombre,retrait_valeur,depots_nombre,depots_valeur)]]
+                             retrait_nombre,retrait_valeur,depots_nombre,depots_valeur,
+                             nb_jours_actifs_ps,nb_jours_actifs_ph,nb_jours_actifs_poker)]]
 write.table(mois, #on veut ecrire la table nommee 'table'
             "data/Costes_mois_vrai.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
             sep = ";", #specifie le separateur des colonnes
@@ -170,7 +178,8 @@ qplot(x=Var1, y=Var2, data=melt(cor_jour[neworder,neworder]), fill=value, geom="
   xlab("")+ylab("")+ggtitle("Correlations (jours)")
 
 colnames(cor_mois)
-neworder = c("ps_mises",
+neworder = c("nb_jours_actifs_ps",
+             "ps_mises",
              "ps_gains",
              "ps_complexes_mises",
              "ps_live_mises",
@@ -183,6 +192,8 @@ neworder = c("ps_mises",
              "ph_gains",
              "ph_simple_mises",
              "ph_complexe_mises",
+             "nb_jours_actifs_ph",
+             "nb_jours_actifs_poker",
              "caves_nombre",
              "caves_euros",
              "bonus_jc_valeur",
