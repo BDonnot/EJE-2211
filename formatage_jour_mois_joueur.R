@@ -1,6 +1,6 @@
 rm(list=ls());gc()
-setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/EJE-2211/Donnees_ARJEL/")
-setwd("D:/Users/Benjamin/Documents/EJE-2211")
+setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/Données ARJEL/")
+setwd("D:/Users/Benjamin/Documents/EJE-2211/")
 library(data.table)
 library(ggplot2)
 library(xtable)
@@ -239,7 +239,7 @@ acpMois=prcomp(mois[,!c("numero_joueur","numero_compte","mois"),with=FALSE],scal
 #fancy plots
 # library("devtools")
 # install_github("kassambara/factoextra")
-library(factoextra)
+
 fviz_pca_var(acpMois, axes = c(1, 2), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
              col.var = "x", alpha.var = 1) +

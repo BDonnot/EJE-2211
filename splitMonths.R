@@ -77,7 +77,7 @@ mois_improved[multi_jeu > 0,nombre_de_comptes]
 # mois_improved[nb_mois_exposes==14 & numero_joueur==12519,]
 # mois_improved[,nb_mois_exposes]
 
-
+str(mois_improved)
 ###############
 ###split DB
 poker = mois_improved[nb_jours_actifs_poker> 0,
@@ -207,4 +207,110 @@ qplot(x=Var1, y=Var2, data=melt(cor_joueur[neworder,neworder]), fill=value, geom
   xlab("")+ylab("")+ggtitle("Correlations (joueurs)")
 
 
+######
+# Base 1 an
+base_1_an=mois_improved[as.Date(first_account)<"2014-01-01",]
 
+
+poker_1_an = base_1_an[nb_jours_actifs_poker> 0,
+                      list(numero_joueur, #le type de toute les colonnes *
+                           numero_compte,
+                           mois,
+                           age_2014_12,
+                           civilite,
+                           depots_nombre,
+                           depots_valeur,
+                           depots_3en12h,
+                           depots_1hapresmise,
+                           bonus_jc_valeur,
+                           bonus_jc_montant,
+                           retrait_nombre,
+                           retrait_valeur,
+                           nb_jours_exposes,
+                           multi_jeu,
+                           nb_jours_actifs_poker,
+                           caves_nombre,
+                           caves_euros
+                      )]
+ph_1_an = base_1_an[nb_jours_actifs_ph> 0,
+                   list(numero_joueur, #le type de toute les colonnes *
+                        numero_compte,
+                        mois,
+                        age_2014_12,
+                        civilite,
+                        depots_nombre,
+                        depots_valeur,
+                        depots_3en12h,
+                        depots_1hapresmise,
+                        bonus_jc_valeur,
+                        bonus_jc_montant,
+                        retrait_nombre,
+                        retrait_valeur,
+                        nb_jours_exposes,
+                        multi_jeu,
+                        nb_jours_actifs_ph,
+                        ph_mises,
+                        ph_gains,
+                        ph_simple_mises,
+                        ph_complexe_mises
+                   )]
+ps_1_an = base_1_an[nb_jours_actifs_ps> 0,
+                   list(numero_joueur, #le type de toute les colonnes *
+                        numero_compte,
+                        mois,
+                        age_2014_12,
+                        civilite,
+                        depots_nombre,
+                        depots_valeur,
+                        depots_3en12h,
+                        depots_1hapresmise,
+                        bonus_jc_valeur,
+                        bonus_jc_montant,
+                        retrait_nombre,
+                        retrait_valeur,
+                        nb_jours_exposes,
+                        multi_jeu,
+                        nb_jours_actifs_ps,
+                        ps_mises,
+                        ps_gains,
+                        ps_complexes_mises,
+                        ps_live_mises,
+                        ps_foot_mises,
+                        ps_tennis_mises,
+                        ps_basket_mises,
+                        ps_rugby_mises,
+                        ps_autres_mises
+                   )]
+sport_melt=melt(fusion_sport[,c(lapply(.SD,sum)),
+                             by=key(ps_1_an),
+                             .SDcols=vars_sport],
+                id.vars=key(fusion_sport))
+hipp_melt=melt(fusion_hipp[,c(lapply(.SD,sum)),
+                           by=key(fusion_hipp),
+                           .SDcols=vars_hipp],
+               id.vars=key(fusion_hipp))
+poker_melt=melt(fusion_poker[,c(lapply(.SD,sum)),
+                             by=key(fusion_poker),
+                             .SDcols=vars_poker],
+                id.vars=key(fusion_poker))
+
+sport_dcast=data.table(dcast(data=sport_melt,formula=numero_joueur*numero_compte~variable*mois),
+                       key=c("numero_joueur","numero_compte"))
+hipp_dcast=data.table(dcast(data=hipp_melt,formula=numero_joueur*numero_compte~variable*mois),
+                      key=c("numero_joueur","numero_compte"))
+poker_dcast=data.table(dcast(data=poker_melt,formula=numero_joueur*numero_compte~variable*mois),
+                       key=c("numero_joueur","numero_compte"))
+
+setkeyv(fusion_sport,c("numero_joueur","numero_compte"))
+setkeyv(fusion_hipp,c("numero_joueur","numero_compte"))
+setkeyv(fusion_poker,c("numero_joueur","numero_compte"))
+
+fusion_compte_sport=fusion_sport[,c(lapply(.SD,sum)),
+                                 by=key(fusion_sport),
+                                 .SDcols=vars_sport][sport_dcast]
+fusion_compte_hipp=fusion_hipp[,c(lapply(.SD,sum)),
+                               by=key(fusion_hipp),
+                               .SDcols=vars_hipp][hipp_dcast]
+fusion_compte_poker=fusion_poker[,c(lapply(.SD,sum)),
+                                 by=key(fusion_poker),
+                                 .SDcols=vars_poker][poker_dcast]
