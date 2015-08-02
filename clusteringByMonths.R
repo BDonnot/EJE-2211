@@ -18,7 +18,8 @@ ps=fread("data/ps_mois.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.
 library(grid)
 library(factoextra)
 poker = poker[mois == "12",]
-acpPoker=prcomp(poker[,!c("numero_joueur","numero_compte","mois","age_2014_12","civilite")
+acpPoker=prcomp(poker[,!c("numero_joueur","numero_compte","mois","age_2014_12","civilite",
+                          "depots_max_semaine","mises_max_semaine")
                       ,with=FALSE],
                 scale=TRUE)
 plot(acpPoker)
@@ -42,10 +43,24 @@ age + scale_color_brewer(palette ="Set1")
 naxes = which.max(cumsum(acpPoker$sdev) > 0.80*sum(acpPoker$sdev))
 inputHclust = predict(acpPoker,poker)[,1:naxes]
 resHclust = hclust(dist(inputHclust))
-plot(resHclust)
+plot(resHclust,labels = FALSE,hang = -1,xlab = "",ylab = "inertie",
+     main = "CAH : poker par mois")
+rect.hclust(resHclust, k = 5, which = NULL, x = NULL, h = NULL,
+            border = "blue", cluster = NULL)
+
 memb <- cutree(resHclust, k = 5)
 # names(memb) = as.character(memb)
 clust <- fviz_pca_ind(acpPoker, geom = "point",
+                    habillage=as.factor(memb), addEllipses=F,
+                    ellipse.level= 0.95)+ theme_minimal()
+clust + scale_color_brewer(palette ="Set1")
+
+clust <- fviz_pca_ind(acpPoker,axes = c(4, 5), geom = "point",
+                    habillage=as.factor(memb), addEllipses=F,
+                    ellipse.level= 0.95)+ theme_minimal()
+clust + scale_color_brewer(palette ="Set1")
+
+clust <- fviz_pca_ind(acpPoker,axes = c(1,3), geom = "point",
                     habillage=as.factor(memb), addEllipses=F,
                     ellipse.level= 0.95)+ theme_minimal()
 clust + scale_color_brewer(palette ="Set1")
