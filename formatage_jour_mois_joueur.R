@@ -1,5 +1,6 @@
 rm(list=ls());gc()
 setwd("C:/Users/aguillot/Documents/Projets Perso/EJE - 2211 - Bercy/Loto/Données ARJEL/")
+setwd("C:/Users/antoine/Documents/Loto/Données ARJEL")
 setwd("D:/Users/Benjamin/Documents/EJE-2211/")
 library(data.table)
 library(ggplot2)
