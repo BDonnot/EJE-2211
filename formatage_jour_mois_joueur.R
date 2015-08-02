@@ -268,11 +268,11 @@ neworder = c("nb_jours_actifs_ps",
              "ps_basket_mises",
              "ps_rugby_mises",
              "ps_autres_mises",
+             "nombre_autointerdiction_ph",
              "ph_mises",
              "ph_gains",
              "ph_simple_mises",
              "ph_complexe_mises",
-             "nombre_autointerdiction_ph",
              "nb_jours_actifs_ph",
              "nb_jours_actifs_poker",
              "caves_nombre",
@@ -325,31 +325,32 @@ PCbiplot <- function(PC, x="PC1", y="PC2", colors=c('black', 'black', 'red', 're
   plot
 }
 
-acpMois=prcomp(mois[,!c("numero_joueur","numero_compte","mois"),with=FALSE],scale=TRUE)
+acpMois=prcomp(mois[,!c("numero_joueur","numero_compte","mois",
+                        "depots_max_semaine","mises_max_semaine"),with=FALSE],scale=TRUE)
 # PCbiplot(acpMois,colors=c("black","black","black","dark blue"))
 
 #fancy plots
 # library("devtools")
 # install_github("kassambara/factoextra")
-
+library(factoextra)
 fviz_pca_var(acpMois, axes = c(1, 2), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
-             col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="blue", mid="purple",
+             col.var = "x", alpha.var = "coord") +
+  scale_color_gradient2(low="blue",mid="orange",
                         high="red") +
   ggtitle("ACP axes 1 & 2 (mois)")
 
 fviz_pca_var(acpMois, axes = c(1, 3), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
-             col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="blue", mid="purple",
+             col.var = "x", alpha.var = "coord") +
+  scale_color_gradient2(low="blue",mid="orange",
                         high="red") +
   ggtitle("ACP axes 1 & 3 (mois)")
 
 fviz_pca_var(acpMois, axes = c(2, 3), geom = c("arrow", "text"),
              label = "var", invisible = "none", labelsize = 4,
-             col.var = "x", alpha.var = 1) +
-  scale_color_gradient2(low="blue", mid="purple",
+             col.var = "x", alpha.var = "coord") +
+  scale_color_gradient2(low="blue",mid="orange",
                         high="red") +
   ggtitle("ACP axes 2 & 3 (mois)")
 

@@ -1,3 +1,10 @@
+rm(list=ls());gc()
+library(data.table)
+
+library(ggplot2)
+library(reshape2)
+setwd("D:/Users/Benjamin/Documents/EJE-2211")
+
 library(data.table)
 ############################
 #chechk correctnes for months
@@ -29,6 +36,11 @@ months[abs((ph_simple_mises+ph_complexe_mises)-ph_mises)>0.5,]
 #5 rows does not match !
 months[abs((ps_autres_mises+ps_rugby_mises+ps_tennis_mises+ps_foot_mises+ps_basket_mises)-ps_mises)>0.5,]
 #4146 rows do not math !
+
+hist(months[abs((ps_autres_mises+ps_rugby_mises+ps_tennis_mises+ps_foot_mises+ps_basket_mises)-ps_mises)>0.5,
+       (ps_autres_mises+ps_rugby_mises+ps_tennis_mises+ps_foot_mises+ps_basket_mises)-ps_mises],
+     main = "difference dans les paris sportifs (mois)",xlab = "difference",ylab = "frequence")
+
 months[abs((ps_autres_mises+ps_rugby_mises+ps_tennis_mises+ps_foot_mises+ps_basket_mises)-ps_mises)>0.5 |
          abs((ph_simple_mises+ph_complexe_mises)-ph_mises)>0.5,]
 
@@ -110,6 +122,19 @@ bothMonth[abs(ps_mises-paris_sportifs_mises) > 0.5,]
 #263 rows !
 bothMonth[abs(ph_mises-paris_hippiques_mises) > 0.5,]
 #55406 rows !
+hist(bothMonth[abs(ph_mises-paris_hippiques_mises) > 0.5,ph_mises-paris_hippiques_mises],
+     1000,
+     main = "difference dans les paris hippique mises (jours vs mois)",
+     xlab = "difference",ylab = "frequence",
+     xlim = c(-1000,1000))
+abline(v = c(mean(bothMonth[ph_mises> 0,ph_mises]),
+             mean(bothMonth[paris_hippiques_mises> 0,paris_hippiques_mises]) ),
+       col = c('blue','red'),
+       lty = 2)
+legend("topleft",
+       legend = c("moyenne mensuelle","moyenne sum(jours)"),
+       lty = 2,
+       col = c("blue","red") )
 
 bothMonth[abs(ph_mises-paris_hippiques_mises) > 0.5 |
             abs(ps_mises-paris_sportifs_mises) > 0.5, ]
