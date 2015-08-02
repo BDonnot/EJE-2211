@@ -17,7 +17,7 @@ ps=fread("data/ps_mois.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.
 
 library(grid)
 library(factoextra)
-poker = poker[mois == "01",]
+poker = poker[mois == "12",]
 acpPoker=prcomp(poker[,!c("numero_joueur","numero_compte","mois","age_2014_12","civilite")
                       ,with=FALSE],
                 scale=TRUE)

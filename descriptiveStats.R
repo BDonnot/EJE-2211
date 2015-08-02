@@ -2,7 +2,7 @@ library(data.table)
 
 library(ggplot2)
 library(reshape2)
-
+setwd("D:/Users/Benjamin/Documents/EJE-2211/")
 table = fread("data/Costes_compte_x1x2_20150311Clean.csv", #le nom du document
               header = T, #oui il y a une entete
               sep = ";", #le separateur *

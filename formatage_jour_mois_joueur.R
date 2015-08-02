@@ -76,6 +76,78 @@ setnames(jour,paste("V",c(1,2,4:20),sep=""),c(
   "bonus_jc_valeur",
   "bonus_jc_montant"))
 
+moderateurs = fread("data/Costes_compte_x1x2_20150311Clean.csv", #le nom du document
+                            header = T, #oui il y a une entete
+                            sep = ";", #le separateur *
+                            colClasses = c(numero_joueur="integer", #le type de toute les colonnes *
+                                           numero_compte="integer",
+                                           date_ouverture="character",
+                                           date_confirmation="character",
+                                           jours_actif_12_mois="integer",
+                                           mises_max_heure="character",
+                                           mises_max_jour="character",
+                                           mises_max_semaine="character",
+                                           mises_max_mois="character",
+                                           depots_max_heure="character",
+                                           depots_max_jour="character",
+                                           depots_max_semaine="character",
+                                           depots_max_mois="character",
+                                           limites_retraits="character",
+                                           nombre_autointerdiction_ps="integer",
+                                           nombre_autointerdiction_ph="integer",
+                                           nombre_autointerdiction_jc="integer",
+                                           mises_max_heure_Chgt="integer",
+                                           mises_max_semaine_Chgt="integer",
+                                           mises_max_mois_Chgt="integer",
+                                           depots_max_heure_Chgt="integer",
+                                           depots_max_jour_Chgt="integer",
+                                           depots_max_semaine_Chgt="integer",
+                                           depots_max_mois_Chgt="integer",
+                                           limites_retraits_Chgt="integer",
+                                           mises_max_heure_last="integer",
+                                           mises_max_jour_last="integer",
+                                           mises_max_semaine_last="integer",
+                                           mises_max_mois_last="integer",
+                                           depots_max_heure_last="integer",
+                                           depots_max_jour_last="integer",
+                                           depots_max_semaine_last="integer",
+                                           depots_max_mois_last="integer",
+                                           limites_retraits_last="integer",
+                                           mises_max_heure_max="integer",
+                                           mises_max_jour_max="integer",
+                                           mises_max_semaine_max="integer",
+                                           mises_max_mois_max="integer",
+                                           depots_max_heure_max="integer",
+                                           depots_max_jour_max="integer",
+                                           depots_max_semaine_max="integer",
+                                           depots_max_mois_max="integer",
+                                           limites_retraits_max="integer",
+                                           mises_max_heure_Baisse = "integer",
+                                           mises_max_jour_Baisse="integer",
+                                           mises_max_semaine_Baisse="integer",
+                                           mises_max_mois_Baisse="integer",
+                                           depots_max_heure_Baisse="integer",
+                                           depots_max_jour_Baisse="integer",
+                                           depots_max_semaine_Baisse="integer",
+                                           depots_max_mois_Baisse="integer",
+                                           limites_retraits_Baisse="integer",
+                                           mises_max_heure_Hausse="integer",
+                                           mises_max_jour_Hausse="integer",
+                                           mises_max_semaine_Hausse="integer",
+                                           mises_max_mois_Hausse="integer",
+                                           depots_max_heure_Hausse="integer",
+                                           depots_max_jour_Hausse="integer",
+                                           depots_max_semaine_Hausse="integer",
+                                           depots_max_mois_Hausse="integer",
+                                           limites_retraits_Hausse="integer")
+)
+moderateurs = moderateurs[,list(numero_joueur,numero_compte,jours_actif_12_mois,
+                                mises_max_semaine,depots_max_semaine,nombre_autointerdiction_ps,
+                                nombre_autointerdiction_ph,nombre_autointerdiction_jc,
+                                mises_max_semaine_Chgt,depots_max_semaine_Chgt,mises_max_semaine_last,
+                                mises_max_semaine_max,depots_max_semaine_max,mises_max_semaine_Baisse,
+                                depots_max_semaine_Baisse,mises_max_semaine_Hausse,depots_max_semaine_Hausse,
+                                limites_retraits_Hausse)]
 #########
 #Nouvelles variables
 joueur[,civilite:=droplevels(factor(civilite,levels=c("M","M/MME","M/U","MME","U"),labels=c("M","M/MME","M","MME","M")))]
@@ -124,6 +196,10 @@ mois = mois_[jour_mois[,list(numero_joueur,numero_compte,mois,
                              caves_nombre,caves_euros,bonus_jc_valeur,bonus_jc_montant,
                              retrait_nombre,retrait_valeur,depots_nombre,depots_valeur,
                              nb_jours_actifs_ps,nb_jours_actifs_ph,nb_jours_actifs_poker)]]
+setkey(mois,numero_joueur,numero_compte)
+setkey(moderateurs,numero_joueur,numero_compte)
+mois = moderateurs[mois]
+
 write.table(mois, #on veut ecrire la table nommee 'table'
             "data/Costes_mois_vrai.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
             sep = ";", #specifie le separateur des colonnes
