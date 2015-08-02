@@ -35,7 +35,25 @@ mois = fread("data/Costes_mois_vrai.csv", #le nom du document
                              depots_valeur="numeric",
                              nb_jours_actifs_ps="integer",
                              nb_jours_actifs_ph="integer",
-                             nb_jours_actifs_poker="integer"
+                             nb_jours_actifs_poker="integer",
+                             numero_joueur,
+                             numero_compte,
+                             jours_actif_12_mois,
+                             mises_max_semaine,
+                             depots_max_semaine,
+                             nombre_autointerdiction_ps,
+                             nombre_autointerdiction_ph,
+                             nombre_autointerdiction_jc,
+                             mises_max_semaine_Chgt,
+                             depots_max_semaine_Chgt,
+                             mises_max_semaine_last,
+                             mises_max_semaine_max,
+                             depots_max_semaine_max,
+                             mises_max_semaine_Baisse,
+                             depots_max_semaine_Baisse,
+                             mises_max_semaine_Hausse,
+                             depots_max_semaine_Hausse,
+                             limites_retraits_Hausse
                                )
 )
 
