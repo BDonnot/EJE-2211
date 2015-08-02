@@ -222,7 +222,9 @@ xtable(data.frame(t(jour_nzero),c(colnames(mois_nzero),NA,NA),rbind(t(mois_nzero
 ##########
 #Correlations (heat map)
 cor_jour=cor(jour[,!c("numero_joueur","numero_compte","jour","mois"),with=FALSE])
-cor_mois=cor(mois[,!c("numero_joueur","numero_compte","mois"),with=FALSE])
+cor_mois=cor(mois[,!c("numero_joueur","numero_compte","mois",
+                      "depots_max_semaine","mises_max_semaine")
+                  ,with=FALSE])
 ind_jour=which((abs(cor_jour)>=0.5)&(cor_jour<1),arr.ind=TRUE)
 ind_mois=which((abs(cor_mois)>=0.5)&(cor_mois<1),arr.ind=TRUE)
 #rownames(cor_jour)[ind_jour[,1]]
@@ -285,7 +287,6 @@ neworder = c("nb_jours_actifs_ps",
              "depots_valeur",
              "depots_3en12h",
              "depots_1hapresmise",
-             "depots_max_semaine",
              "retrait_nombre",
              "retrait_valeur",
              "limites_retraits_Hausse",
@@ -294,8 +295,7 @@ neworder = c("nb_jours_actifs_ps",
              "mises_max_semaine_last",
              "mises_max_semaine_max",
              "mises_max_semaine_Baisse",
-             "mises_max_semaine_Hausse",
-             "mises_max_semaine")
+             "mises_max_semaine_Hausse")
 qplot(x=Var1, y=Var2, data=melt(cor_mois[neworder,neworder]), fill=value, geom="tile") +
   scale_fill_gradient2(limits=c(-1, 1)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
