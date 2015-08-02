@@ -255,6 +255,7 @@ qplot(x=Var1, y=Var2, data=melt(cor_jour[neworder,neworder]), fill=value, geom="
 
 colnames(cor_mois)
 neworder = c("nb_jours_actifs_ps",
+             "nombre_autointerdiction_ps",
              "ps_mises",
              "ps_gains",
              "ps_complexes_mises",
@@ -268,19 +269,33 @@ neworder = c("nb_jours_actifs_ps",
              "ph_gains",
              "ph_simple_mises",
              "ph_complexe_mises",
+             "nombre_autointerdiction_ph",
              "nb_jours_actifs_ph",
              "nb_jours_actifs_poker",
              "caves_nombre",
              "caves_euros",
              "bonus_jc_valeur",
              "bonus_jc_montant",
+             "nombre_autointerdiction_jc",
+             "depots_max_semaine_Chgt",
+             "depots_max_semaine_max",
+             "depots_max_semaine_Baisse",
+             "depots_max_semaine_Hausse",
              "depots_nombre",
              "depots_valeur",
              "depots_3en12h",
              "depots_1hapresmise",
+             "depots_max_semaine",
              "retrait_nombre",
-             "retrait_valeur"
-             )
+             "retrait_valeur",
+             "limites_retraits_Hausse",
+             "jours_actif_12_mois",
+             "mises_max_semaine_Chgt",
+             "mises_max_semaine_last",
+             "mises_max_semaine_max",
+             "mises_max_semaine_Baisse",
+             "mises_max_semaine_Hausse",
+             "mises_max_semaine")
 qplot(x=Var1, y=Var2, data=melt(cor_mois[neworder,neworder]), fill=value, geom="tile") +
   scale_fill_gradient2(limits=c(-1, 1)) +
   theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
