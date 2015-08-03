@@ -222,7 +222,7 @@ write.table(ps, #on veut ecrire la table nommee 'table'
             col.names = T) #on specifie par contre qu'il faut ecrire le nom des colonnes !
 
 ################
-###Corerlation (players)
+###Correlation (players)
 
 setkey(mois_improved,numero_joueur)
 neworder = c("nb_jours_actifs_ps",
@@ -279,26 +279,39 @@ qplot(x=Var1, y=Var2, data=melt(cor_joueur[neworder,neworder]), fill=value, geom
 # Base 1 an
 base_1_an=mois_improved[as.Date(first_account)<"2014-01-01",]
 
-
-poker_1_an = base_1_an[nb_jours_actifs_poker> 0,
-                      list(numero_joueur, #le type de toute les colonnes *
-                           numero_compte,
-                           mois,
-                           age_2014_12,
-                           civilite,
-                           depots_nombre,
-                           depots_valeur,
-                           depots_3en12h,
-                           depots_1hapresmise,
-                           bonus_jc_valeur,
-                           bonus_jc_montant,
-                           retrait_nombre,
-                           retrait_valeur,
-                           nb_jours_exposes,
-                           multi_jeu,
-                           nb_jours_actifs_poker,
-                           caves_nombre,
-                           caves_euros
+#Division par type de jeu (observation et variable)
+poker_1_an = base_1_an[nb_jours_actifs_poker> 0,list(
+                       numero_joueur, #le type de toute les colonnes *
+                       numero_compte,
+                       mois,
+                       age_2014_12,
+                       civilite,
+                       depots_nombre,
+                       depots_valeur,
+                       depots_3en12h,
+                       depots_1hapresmise,
+                       bonus_jc_valeur,
+                       bonus_jc_montant,
+                       retrait_nombre,
+                       retrait_valeur,
+                       nb_jours_exposes,
+                       multi_jeu,
+                       mises_max_semaine,
+                       depots_max_semaine,
+                       mises_max_semaine_Chgt,
+                       depots_max_semaine_Chgt,
+                       mises_max_semaine_last,
+                       mises_max_semaine_max,
+                       depots_max_semaine_max,
+                       mises_max_semaine_Baisse,
+                       depots_max_semaine_Baisse,
+                       mises_max_semaine_Hausse,
+                       depots_max_semaine_Hausse,
+                       limites_retraits_Hausse,
+                       nb_jours_actifs_poker,
+                       caves_nombre,
+                       caves_euros,
+                       nombre_autointerdiction_jc
                       )]
 ph_1_an = base_1_an[nb_jours_actifs_ph> 0,
                    list(numero_joueur, #le type de toute les colonnes *
@@ -316,11 +329,24 @@ ph_1_an = base_1_an[nb_jours_actifs_ph> 0,
                         retrait_valeur,
                         nb_jours_exposes,
                         multi_jeu,
+                        mises_max_semaine,
+                        depots_max_semaine,
+                        mises_max_semaine_Chgt,
+                        depots_max_semaine_Chgt,
+                        mises_max_semaine_last,
+                        mises_max_semaine_max,
+                        depots_max_semaine_max,
+                        mises_max_semaine_Baisse,
+                        depots_max_semaine_Baisse,
+                        mises_max_semaine_Hausse,
+                        depots_max_semaine_Hausse,
+                        limites_retraits_Hausse,
                         nb_jours_actifs_ph,
                         ph_mises,
                         ph_gains,
                         ph_simple_mises,
-                        ph_complexe_mises
+                        ph_complexe_mises,
+                        nombre_autointerdiction_ph
                    )]
 ps_1_an = base_1_an[nb_jours_actifs_ps> 0,
                    list(numero_joueur, #le type de toute les colonnes *
@@ -338,6 +364,18 @@ ps_1_an = base_1_an[nb_jours_actifs_ps> 0,
                         retrait_valeur,
                         nb_jours_exposes,
                         multi_jeu,
+                        mises_max_semaine,
+                        depots_max_semaine,
+                        mises_max_semaine_Chgt,
+                        depots_max_semaine_Chgt,
+                        mises_max_semaine_last,
+                        mises_max_semaine_max,
+                        depots_max_semaine_max,
+                        mises_max_semaine_Baisse,
+                        depots_max_semaine_Baisse,
+                        mises_max_semaine_Hausse,
+                        depots_max_semaine_Hausse,
+                        limites_retraits_Hausse,
                         nb_jours_actifs_ps,
                         ps_mises,
                         ps_gains,
@@ -347,8 +385,155 @@ ps_1_an = base_1_an[nb_jours_actifs_ps> 0,
                         ps_tennis_mises,
                         ps_basket_mises,
                         ps_rugby_mises,
-                        ps_autres_mises
+                        ps_autres_mises,
+                        nombre_autointerdiction_ps
                    )]
+
+#Keys
+setkeyv(poker_1_an,c("numero_joueur","numero_compte"))
+setkeyv(ph_1_an,c("numero_joueur","numero_compte"))
+setkeyv(ps_1_an,c("numero_joueur","numero_compte"))
+
+#Agregation (somme) des variables numeriques
+poker_1_an_=poker_1_an[,c(lapply(.SD,sum)),
+                                 by=key(poker_1_an),
+                                 .SDcols=c(
+                                 "depots_nombre",
+                                 "depots_valeur",
+                                 "depots_3en12h",
+                                 "depots_1hapresmise",
+                                 "bonus_jc_valeur",
+                                 "bonus_jc_montant",
+                                 "retrait_nombre",
+                                 "retrait_valeur",
+                                 "caves_nombre",
+                                 "caves_euros",
+                                 "nombre_autointerdiction_jc")
+                                 ]
+
+#Puis fusion avec les variables propres au joueur/compte
+poker_1_an=poker_1_an[,list(
+  numero_joueur, #le type de toute les colonnes *
+  numero_compte,
+  age_2014_12,
+  civilite,
+  nb_jours_actifs_poker,
+  nb_jours_exposes,
+  multi_jeu,
+                      mises_max_semaine_Chgt,
+                      depots_max_semaine_Chgt,
+                      mises_max_semaine_last,
+                      mises_max_semaine_max,
+                      depots_max_semaine_max,
+                      mises_max_semaine_Baisse,
+                      depots_max_semaine_Baisse,
+                      mises_max_semaine_Hausse,
+                      depots_max_semaine_Hausse,
+                      limites_retraits_Hausse)][poker_1_an_,mult="first"]
+
+
+
+ph_1_an_=ph_1_an[,c(lapply(.SD,sum)),
+                       by=key(ph_1_an),
+                       .SDcols=c(
+                         "ph_mises",
+                         "ph_gains",
+                         "ph_simple_mises",
+                         "ph_complexe_mises",
+                         "depots_nombre",
+                         "depots_valeur",
+                         "depots_3en12h",
+                         "depots_1hapresmise",
+                         "retrait_nombre",
+                         "retrait_valeur",
+                         "nombre_autointerdiction_ph")
+                       ]
+ph_1_an=ph_1_an[,list(
+  numero_joueur, #le type de toute les colonnes *
+  numero_compte,
+  age_2014_12,
+  civilite,
+  nb_jours_actifs_ph,
+  nb_jours_exposes,
+  multi_jeu,
+  mises_max_semaine_Chgt,
+  depots_max_semaine_Chgt,
+  mises_max_semaine_last,
+  mises_max_semaine_max,
+  depots_max_semaine_max,
+  mises_max_semaine_Baisse,
+  depots_max_semaine_Baisse,
+  mises_max_semaine_Hausse,
+  depots_max_semaine_Hausse,
+  limites_retraits_Hausse)][ph_1_an_,mult="first"]
+
+ps_1_an_=ps_1_an[,c(lapply(.SD,sum)),
+                 by=key(ps_1_an),
+                 .SDcols=c(
+                   "ps_mises",
+                   "ps_gains",
+                   "ps_complexes_mises",
+                   "ps_live_mises",
+                   "ps_foot_mises",
+                   "ps_tennis_mises",
+                   "ps_basket_mises",
+                   "ps_rugby_mises",
+                   "ps_autres_mises",
+                   "depots_nombre",
+                   "depots_valeur",
+                   "depots_3en12h",
+                   "depots_1hapresmise",
+                   "retrait_nombre",
+                   "retrait_valeur",
+                   "nombre_autointerdiction_ps")
+                 ]
+ps_1_an=ps_1_an[,list(
+  numero_joueur, #le type de toute les colonnes *
+  numero_compte,
+  age_2014_12,
+  civilite,
+  nb_jours_actifs_ps,
+  nb_jours_exposes,
+  multi_jeu,
+  mises_max_semaine_Chgt,
+  depots_max_semaine_Chgt,
+  mises_max_semaine_last,
+  mises_max_semaine_max,
+  depots_max_semaine_max,
+  mises_max_semaine_Baisse,
+  depots_max_semaine_Baisse,
+  mises_max_semaine_Hausse,
+  depots_max_semaine_Hausse,
+  limites_retraits_Hausse)][ps_1_an_,mult="first"]
+
+write.table(poker_1_an, #on veut ecrire la table nommee 'table'
+            "data/poker_an.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
+            sep = ";", #specifie le separateur des colonnes
+            row.names = F, #les lignes n'ont pas noms particulier, on ne rajoutera donc pas une colonne du type 'nom des lignes'
+            col.names = T) #on specifie par contre qu'il faut ecrire le nom des colonnes !
+write.table(ph_1_an, #on veut ecrire la table nommee 'table'
+            "data/ph_an.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
+            sep = ";", #specifie le separateur des colonnes
+            row.names = F, #les lignes n'ont pas noms particulier, on ne rajoutera donc pas une colonne du type 'nom des lignes'
+            col.names = T) #on specifie par contre qu'il faut ecrire le nom des colonnes !
+write.table(ps_1_an, #on veut ecrire la table nommee 'table'
+            "data/ps_an.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.csv', situe dans le dossier "data/"
+            sep = ";", #specifie le separateur des colonnes
+            row.names = F, #les lignes n'ont pas noms particulier, on ne rajoutera donc pas une colonne du type 'nom des lignes'
+            col.names = T) #on specifie par contre qu'il faut ecrire le nom des colonnes !
+
+
+
+
+
+
+
+
+
+
+
+###########################
+## Melting pour demultiplier les variables par mois
 sport_melt=melt(fusion_sport[,c(lapply(.SD,sum)),
                              by=key(ps_1_an),
                              .SDcols=vars_sport],
