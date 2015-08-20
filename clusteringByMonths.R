@@ -17,9 +17,25 @@ ps=fread("data/ps_mois.csv", #dans le fichier 'Costes_compte_x1x2_20150311Clean.
 
 library(grid)
 library(factoextra)
+
+###POKER
 poker = poker[mois == "12",]
-acpPoker=prcomp(poker[,!c("numero_joueur","numero_compte","mois","age_2014_12","civilite",
-                          "depots_max_semaine","mises_max_semaine")
+#attention : on enleve mise_max_semaine_max parce que donnees pourries !
+#mises_max_semaine_last
+#mises_max_semaine_last
+cols_rem = c("numero_joueur","numero_compte","mois","age_2014_12","civilite",
+             "depots_max_semaine","mises_max_semaine","mises_max_semaine_max",
+             "mises_max_semaine_last","depots_max_semaine_max",
+             "mises_max_semaine_max",
+             "mises_max_semaine_last",
+             "mises_max_semaine_Chgt",
+             "depots_max_semaine_Chgt",
+             "depots_max_semaine_max",
+             "mises_max_semaine_Baisse",
+             "depots_max_semaine_Baisse", 
+             "mises_max_semaine_Hausse",
+             "depots_max_semaine_Hausse")
+acpPoker=prcomp(poker[,!cols_rem
                       ,with=FALSE],
                 scale=TRUE)
 plot(acpPoker)
@@ -40,6 +56,7 @@ age <- fviz_pca_ind(acpPoker, geom = "point",
 age + scale_color_brewer(palette ="Set1")
 
 
+
 naxes = which.max(cumsum(acpPoker$sdev) > 0.80*sum(acpPoker$sdev))
 inputHclust = predict(acpPoker,poker)[,1:naxes]
 resHclust = hclust(dist(inputHclust))
@@ -55,10 +72,7 @@ clust <- fviz_pca_ind(acpPoker, geom = "point",
                     ellipse.level= 0.95)+ theme_minimal()
 clust + scale_color_brewer(palette ="Set1")
 
-clust <- fviz_pca_ind(acpPoker,axes = c(4, 5), geom = "point",
-                    habillage=as.factor(memb), addEllipses=F,
-                    ellipse.level= 0.95)+ theme_minimal()
-clust + scale_color_brewer(palette ="Set1")
+
 
 clust <- fviz_pca_ind(acpPoker,axes = c(1,3), geom = "point",
                     habillage=as.factor(memb), addEllipses=F,
@@ -66,9 +80,59 @@ clust <- fviz_pca_ind(acpPoker,axes = c(1,3), geom = "point",
 clust + scale_color_brewer(palette ="Set1")
 
 poker[,clust := memb]
-setkey(poker,clust)
-poker
-cols = colnames(poker)[!(colnames(poker) %in% c("numero_joueur","numero_compte","mois","age_2014_12","civilite"))]
-meansByClust = poker[,lapply(.SD,mean,na.rm = T),
-                     .SDcols = cols,
-                     by = key(poker)]
+
+#cluster 2
+#ne se voit pas sur l'ACP, en vrai énorme dépots
+#chasing important
+#bcp de retrait
+#cave euros / caves nombre grand
+#chasing important 
+
+#cluster 3
+#-> joueur compulsif qui joue bcp (il a le max des mises)
+
+#cluster 4
+clust <- fviz_pca_ind(acpPoker,axes = c(3, 4), geom = "point",
+                      habillage=as.factor(memb), addEllipses=F,
+                      ellipse.level= 0.95)+ theme_minimal()
+clust + scale_color_brewer(palette ="Set1")
+fviz_pca_var(acpPoker, axes = c(3, 4), geom = c("arrow", "text"),
+             label = "var", invisible = "none", labelsize = 4,
+             col.var = "x", alpha.var = "coord") +
+  scale_color_gradient2(low="blue",mid="orange",
+                        high="red") +
+  ggtitle("ACP axes 4 & 5 (poker)")
+#pas multi jeu
+#souvent actif
+#bcp bonus
+#bcp caves
+#chasing important 
+#nb_jours_actifs_poker faible
+
+#cluster 5
+clust <- fviz_pca_ind(acpPoker,axes = c(4, 5), geom = "point",
+                      habillage=as.factor(memb), addEllipses=F,
+                      ellipse.level= 0.95)+ theme_minimal()
+clust + scale_color_brewer(palette ="Set1")
+fviz_pca_var(acpPoker, axes = c(4, 5), geom = c("arrow", "text"),
+             label = "var", invisible = "none", labelsize = 4,
+             col.var = "x", alpha.var = "coord") +
+  scale_color_gradient2(low="blue",mid="orange",
+                        high="red") +
+  ggtitle("ACP axes 4 & 5 (poker)")
+#bcp nombre_autointerdiction_jc
+#ratio_caves ++
+#peu jours actifs
+
+
+
+
+
+
+
+
+
+
+
+
+
